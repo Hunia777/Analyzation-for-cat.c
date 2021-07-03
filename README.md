@@ -1,5 +1,5 @@
 ## THIS REPOSITORY IS FOR UNDERSTANDING
-HOW TO WORKS THE "cat" In LINUX
+How to works the "cat" In LINUX
 	Therefore, copyrights for this code is in GNU
 	I try to revise something from this original cat.c
 
