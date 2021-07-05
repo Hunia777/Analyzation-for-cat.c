@@ -565,7 +565,7 @@ int main(int argc, char **argv)
           {"show-ends", no_argument, NULL, 'E'},
           {"show-tabs", no_argument, NULL, 'T'},
           {"show-all", no_argument, NULL, 'A'},
-          {"hong", no_argument, NULL, 'H'},
+          {"hong", no_argument, NULL, 'h'},
           {GETOPT_HELP_OPTION_DECL},    //cat --help
           {GETOPT_VERSION_OPTION_DECL}, //cat --version
           {NULL, 0, NULL, 0}            //END OF OPTIONS
@@ -593,13 +593,14 @@ int main(int argc, char **argv)
       pwd = fork();
       if(pwd == 0)
       {
+        printf("================== HONG VER =================\n");
         printf("YOUR EXECUTION DIRECTORY LOCATION IN TERMINAL\n");
         execl(pwd_ex, "pwd" ,(char *) NULL);
       }
       else
       {
         wait(NULL);
-        printf("\n");
+		printf("\n\n");
       }
       break;
 
@@ -691,7 +692,9 @@ int main(int argc, char **argv)
 
   infile = "-";
   argind = optind;
-
+  
+  /* Do while문이라서 일단 한번 실행후 조건 확인*/
+  /* 여기서 조건은 while (++argind < argc)인데, 즉 실행될때 입력받은 argument갯수만큼 진행됨 */
   do
   {
     if (argind < argc)
@@ -790,12 +793,12 @@ static inline void *ptr_align (void const *ptr, size_t alignment)
                 squeeze_blank);
 
       free(outbuf);
-    }
+   }
 
     free(inbuf);
 
   contin:
-    if (!STREQ(infile, "-") && close(input_desc) < 0)
+    if (!STREQ(infile, "-") && close(input_desc) < 0) //STREQ는 strcmp와 동일한 기능, 같으면 0을 리턴.
     {
       error(0, errno, "%s", quotef(infile));
       ok = false;
