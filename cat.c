@@ -97,6 +97,7 @@ Concatenate FILE(s) to standard output.\n\
 
     fputs(_("\
 \n\
+  -h, --hong               Revised option for HONG :) \n\
   -A, --show-all           equivalent to -vET\n\
   -b, --number-nonblank    number nonempty output lines, overrides -n\n\
   -e                       equivalent to -vE\n\
@@ -149,13 +150,13 @@ static void next_line_num(void)
 /* Plain cat.  Copies the file behind 'input_desc' to STDOUT_FILENO.
    Return true if successful.  */
 
-static bool simple_cat(char *buf, size_t bufsize) // Caller calls simple_cat(ptr_align(inbuf, page_size), insize);
+static bool simple_cat(char *buf, size_t bufsize, bool OPT_HONG) // Caller calls simple_cat(ptr_align(inbuf, page_size), insize);
                                                   /* buf = Pointer to the buffer, used by reads and writes.  */
                                                   /* bufsize = Number of characters preferably read or written by each read and write call.  */
 {
   /* Actual number of characters read, and therefore written.  */
   size_t n_read;
-
+  int byte_size = 0;
   /* Loop until the end of the file.  */
 
   while (true)
@@ -172,7 +173,7 @@ static bool simple_cat(char *buf, size_t bufsize) // Caller calls simple_cat(ptr
     /* End of this file?  */
 
     if (n_read == 0) //0 means EOF
-      return true;
+      goto HONG;
 
     /* Write this block out.  */
 
@@ -183,8 +184,23 @@ static bool simple_cat(char *buf, size_t bufsize) // Caller calls simple_cat(ptr
       Return the number of bytes successfully written, setting errno if that is less than COUNT.*/
       if (full_write(STDOUT_FILENO, buf, n) != n) //즉 stdout(zsh에 출력)이 성공적이면 읽어온만큼 쓰는것이됨.
         die(EXIT_FAILURE, errno, _("write error"));
+	  byte_size += (int)n;
     }
   }
+  //while문 다 끝난후, HONG option 실행.
+
+HONG:
+  if(!OPT_HONG)
+  {
+	  //printf("NOT HONG\n");
+	  return 0;
+  }
+  else
+  {
+	  printf("\n TOTAL READ BYTE FROM FILE == %d\n", byte_size);
+	  return 0;
+  }
+
 }
 
 /* Write any pending output to STDOUT_FILENO.
@@ -543,6 +559,7 @@ int main(int argc, char **argv)
   bool show_ends = false;
   bool show_nonprinting = false;
   bool show_tabs = false;
+  bool OPT_HONG = false;
   int file_open_mode = O_RDONLY;
   /*struct option
       {
@@ -591,14 +608,16 @@ int main(int argc, char **argv)
     {
     case 'h':
       pwd = fork();
-      if(pwd == 0)
+	  if(pwd == 0)
       {
         printf("================== HONG VER =================\n");
-        printf("YOUR EXECUTION DIRECTORY LOCATION IN TERMINAL\n");
-        execl(pwd_ex, "pwd" ,(char *) NULL);
+        printf("YOUR OS HAS [%d]BYTE PAGE SIZE\n",(int)sysconf(_SC_PAGESIZE));
+		printf("YOUR EXECUTION DIRECTORY LOCATION IN TERMINAL\n");
+		execl(pwd_ex, "pwd" ,(char *) NULL);
       }
       else
       {
+		OPT_HONG = true;
         wait(NULL);
 		printf("\n\n");
       }
@@ -747,7 +766,7 @@ int main(int argc, char **argv)
       insize = MAX(insize, outsize);           //The optimal number of bytes to read.
       inbuf = xmalloc(insize + page_size - 1); //xmalloc returns non_null value of malloc, inbuf는 input buffer의 point임.
 
-      ok &= simple_cat(ptr_align(inbuf, page_size), insize);
+      ok &= simple_cat(ptr_align(inbuf, page_size), insize, OPT_HONG);
       /*
 Return PTR, aligned upward to the next multiple of ALIGNMENT. ALIGNMENT must be nonzero.  The caller must arrange for ((char *) PTR) through ((char *) PTR + ALIGNMENT - 1) to be addressable locations.  
 
