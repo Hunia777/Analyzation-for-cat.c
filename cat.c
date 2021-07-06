@@ -150,7 +150,7 @@ static void next_line_num(void)
 /* Plain cat.  Copies the file behind 'input_desc' to STDOUT_FILENO.
    Return true if successful.  */
 
-static bool simple_cat(char *buf, size_t bufsize, bool OPT_HONG) // Caller calls simple_cat(ptr_align(inbuf, page_size), insize);
+static bool simple_cat(char *buf, size_t bufsize, bool OPT_HONG, struct stat sb) // Caller calls simple_cat(ptr_align(inbuf, page_size), insize);
                                                   /* buf = Pointer to the buffer, used by reads and writes.  */
                                                   /* bufsize = Number of characters preferably read or written by each read and write call.  */
 {
@@ -192,13 +192,43 @@ static bool simple_cat(char *buf, size_t bufsize, bool OPT_HONG) // Caller calls
 HONG:
   if(!OPT_HONG)
   {
-	  //printf("NOT HONG\n");
 	  return 0;
   }
   else
   {
-	  printf("\n TOTAL READ BYTE FROM FILE == %d\n", byte_size);
-	  return 0;
+	 printf("\nFILE INFORMATION BY FSTAT()\n");
+	 printf("File type: "); 
+	 switch (sb.st_mode & S_IFMT) 
+	 { 
+		 case S_IFBLK: printf("block device\n"); 
+					   break; 
+		 case S_IFCHR: printf("character device\n"); 
+					   break; 
+		 case S_IFDIR: printf("directory\n"); 
+					   break; 
+		 case S_IFIFO: printf("FIFO/pipe\n"); 
+					   break; 
+		 case S_IFLNK: printf("symlink\n"); 
+					   break; 
+		 case S_IFREG: printf("regular file\n"); 
+					   break; 
+		 case S_IFSOCK: printf("socket\n"); 
+						break; 
+		 default: printf("unknown?\n"); 
+				  		break; 
+	 } 
+	 printf("I-node number: %ld\n", (long) sb.st_ino); 
+	 printf("Mode: %lo (octal)\n", (unsigned long) sb.st_mode); 
+	 printf("Link count: %ld\n", (long) sb.st_nlink); 
+	 printf("Ownership: UID=%ld GID=%ld\n", (long) sb.st_uid, (long) sb.st_gid); 
+	 printf("Preferred I/O block size: %ld bytes\n", (long) sb.st_blksize); 
+	 printf("File size: %lld bytes\n", (long long) sb.st_size); 
+	 printf("Blocks allocated: %lld\n", (long long) sb.st_blocks); 
+	 printf("Last status change: %s", ctime(&sb.st_ctime)); 
+	 printf("Last file access: %s", ctime(&sb.st_atime)); 
+	 printf("Last file modification: %s", ctime(&sb.st_mtime));
+	 printf("Total read bytes by full_write(): %d\n", byte_size);
+	 return 0;
   }
 
 }
@@ -766,7 +796,7 @@ int main(int argc, char **argv)
       insize = MAX(insize, outsize);           //The optimal number of bytes to read.
       inbuf = xmalloc(insize + page_size - 1); //xmalloc returns non_null value of malloc, inbuf는 input buffer의 point임.
 
-      ok &= simple_cat(ptr_align(inbuf, page_size), insize, OPT_HONG);
+      ok &= simple_cat(ptr_align(inbuf, page_size), insize, OPT_HONG, stat_buf);
       /*
 Return PTR, aligned upward to the next multiple of ALIGNMENT. ALIGNMENT must be nonzero.  The caller must arrange for ((char *) PTR) through ((char *) PTR + ALIGNMENT - 1) to be addressable locations.  
 
