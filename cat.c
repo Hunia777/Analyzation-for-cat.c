@@ -197,7 +197,7 @@ HONG:
   }
   else
   {
-	  printf("\n TOTAL READ BYTE FROM FILE == %d\n", byte_size);
+	  printf("\nTOTAL READ BYTE FROM FILE == %d\n", byte_size);
 	  return 0;
   }
 
