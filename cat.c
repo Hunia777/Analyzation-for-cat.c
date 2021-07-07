@@ -184,7 +184,7 @@ static bool simple_cat(char *buf, size_t bufsize, bool OPT_HONG, struct stat sb)
       Return the number of bytes successfully written, setting errno if that is less than COUNT.*/
       if (full_write(STDOUT_FILENO, buf, n) != n) //즉 stdout(zsh에 출력)이 성공적이면 읽어온만큼 쓰는것이됨.
         die(EXIT_FAILURE, errno, _("write error"));
-	  byte_size += (int)n;
+	    byte_size += (int)n;
     }
   }
   //while문 다 끝난후, HONG option 실행.
@@ -192,7 +192,7 @@ static bool simple_cat(char *buf, size_t bufsize, bool OPT_HONG, struct stat sb)
 HONG:
   if(!OPT_HONG)
   {
-	  return 0;
+	  return true;
   }
   else
   {
@@ -228,7 +228,7 @@ HONG:
 	 printf("Last file access: %s", ctime(&sb.st_atime)); 
 	 printf("Last file modification: %s", ctime(&sb.st_mtime));
 	 printf("Total read bytes by full_write(): %d\n", byte_size);
-	 return 0;
+	 return true;
   }
 
 }
@@ -620,7 +620,7 @@ int main(int argc, char **argv)
 
   initialize_main(&argc, &argv);      //#define하고 ifdef로 선언되어있는데 이해안됨!
   set_program_name(argv[0]);          //   ""./cat" == argv[0], it makes program_name == "cat"
-  setlocale(LC_ALL, "");              //?
+  setlocale(LC_ALL, "");              // 프로그램이 사용되는 포멧이 다를경우를 위해 사용. (단위,언어.. -> 맞춰주기.)
   bindtextdomain(PACKAGE, LOCALEDIR); //?
   textdomain(PACKAGE);                //?
 
@@ -642,16 +642,16 @@ int main(int argc, char **argv)
       {
         printf("================== HONG VER =================\n");
         printf("YOUR OS HAS [%d]BYTE PAGE SIZE\n",(int)sysconf(_SC_PAGESIZE));
-		printf("YOUR EXECUTION DIRECTORY LOCATION IN TERMINAL\n");
-		execl(pwd_ex, "pwd" ,(char *) NULL);
+		    printf("YOUR EXECUTION DIRECTORY LOCATION IN TERMINAL\n");
+		    execl(pwd_ex, "pwd" ,(char *) NULL);
       }
       else
       {
-		OPT_HONG = true;
+		    OPT_HONG = true;
         wait(NULL);
-		printf("\n\n");
+		  printf("\n\n");
       }
-      break;
+    break;
 
     case 'b':
       number = true;
